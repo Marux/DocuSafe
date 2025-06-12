@@ -1,84 +1,116 @@
-📞 Proyecto de Contactabilidad con FastAPI
-Este proyecto fue creado como una prueba de concepto para construir una API que permita gestionar procesos de contactabilidad, autenticación segura, y procesamiento de documentos como PDF, DOCX y Excel. Está desarrollado en Python utilizando FastAPI, ideal para construir servicios web modernos y de alto rendimiento.
+API de Gestión de Archivos con Autenticación JWT
+Este proyecto es una API REST construida con FastAPI que permite gestionar archivos con autenticación JWT. Incluye funcionalidades para subir, descargar, listar y eliminar archivos, así como unificar diferentes tipos de archivos en uno solo.
 
-🚀 Tecnologías Utilizadas
-FastAPI – Framework para APIs rápidas y modernas
+Características principales
+Autenticación JWT mediante cookies o headers
 
-Uvicorn – Servidor ASGI ligero y veloz
+CORS configurado para desarrollo
 
-Python-Jose – Para generación y verificación de tokens JWT
+Endpoints protegidos con roles de usuario
 
-Passlib + Bcrypt – Para hashing y verificación segura de contraseñas
+Soporte para múltiples formatos de archivo (TXT, DOCX, XLSX, PDF)
 
-HTTPX – Cliente HTTP asíncrono
+Integración con webhooks (n8n)
 
-python-multipart – Para manejo de formularios y archivos
+Validación de seguridad contra path traversal
 
-pandas – Procesamiento de datos tabulares
+Requisitos
+Python 3.7+
 
-requests – Cliente HTTP sencillo y poderoso
+Las siguientes dependencias (ver requirements.txt):
 
-python-docx – Lectura de archivos .docx
+fastapi==0.109.1
+uvicorn==0.27.0
+python-jose==3.3.0
+passlib==1.7.4
+bcrypt==3.2.2
+httpx==0.27.0
+python-multipart==0.0.9
 
-PyMuPDF – Lectura de archivos PDF
+Instalación
+Clona el repositorio
 
-🛠️ Instalación Paso a Paso
-Crea y activa un entorno virtual:
+Crea un entorno virtual:
 
 bash
-Copiar
-Editar
 python3 -m venv .venv
-source .venv/bin/activate
-Instala las dependencias necesarias:
+source venv/bin/activate  # Linux/Mac
+venv\Scripts\activate  # Windows
 
-bash
-Copiar
-Editar
+
 pip install fastapi uvicorn python-jose passlib bcrypt==3.2.2 httpx python-multipart pandas requests python-docx PyMuPDF
-Ejecuta la aplicación:
 
+Configuración
+Antes de ejecutar la API, asegúrate de configurar:
+
+SECRET_KEY en auth.py (usa una clave segura en producción)
+
+ACCESS_TOKEN_EXPIRE_MINUTES para el tiempo de expiración del token
+
+WEBHOOK_URL en main.py si deseas usar la integración con n8n
+
+Uso
+Iniciar el servidor
 bash
-Copiar
-Editar
 uvicorn main:app --reload
-Visita tu API en:
 
-cpp
-Copiar
-Editar
-http://127.0.0.1:8000
-Y la documentación interactiva en:
+La API estará disponible en http://localhost:8000 con documentación interactiva en /docs.
 
-arduino
-Copiar
-Editar
-http://127.0.0.1:8000/docs
-🔐 Credenciales de Prueba
-Puedes autenticarte usando:
+Endpoints principales
+Autenticación
+POST /token: Obtén un token JWT (credenciales por defecto: admin/secret123)
 
-Usuario: admin
+Operaciones con archivos
+POST /upload: Sube un archivo (requiere autenticación)
 
-Contraseña: secret123
+GET /files: Lista todos los archivos disponibles
 
-📁 Estructura del Proyecto
-bash
-Copiar
-Editar
+GET /files/{filename}: Descarga un archivo específico
+
+DELETE /files/{filename}: Elimina un archivo
+
+GET /unify-files: Une todos los archivos en un solo TXT y envía a webhook
+
+Estructura del proyecto
+text
 .
-├── main.py               # Punto de entrada principal de la aplicación
-├── auth.py               # Manejo de autenticación y generación de tokens
-├── dependencies.py       # Funciones comunes para dependencias como el usuario actual
-├── requirements.txt      # Lista de dependencias del proyecto
-├── .venv/                # Entorno virtual (no subir a GitHub)
-🌱 Próximas Mejoras
-Gestión de usuarios desde una base de datos real
+├── main.py            # Punto de entrada de la API
+├── auth.py            # Lógica de autenticación y JWT
+├── storage/           # Directorio donde se guardan los archivos
+├── README.md          # Este archivo
+└── requirements.txt   # Dependencias del proyecto
+Seguridad
+Todos los endpoints (excepto /token) requieren autenticación
 
-Soporte para múltiples roles y permisos
+Las contraseñas se almacenan hasheadas con bcrypt
 
-Procesamiento avanzado de documentos (OCR, NLP)
+Los tokens JWT tienen tiempo de expiración
 
-Despliegue en la nube con Docker
+Validación contra path traversal en operaciones con archivos
 
-📄 Licencia
-Este proyecto es de libre uso con fines educativos o de pruebas. ¡Adáptalo a tus necesidades!
+Cookies HTTP-only para tokens
+
+Ejemplo de uso
+Obtener token:
+
+bash
+curl -X POST "http://localhost:8000/token" \
+-H "Content-Type: application/json" \
+-d '{"username":"admin","password":"secret123"}'
+Subir archivo (con token en cookie):
+
+bash
+curl -X POST "http://localhost:8000/upload" \
+-H "Cookie: access_token=Bearer <TU_TOKEN>" \
+-F "file=@mi_archivo.txt"
+Notas de producción
+No usar la SECRET_KEY de ejemplo en producción
+
+Configurar HTTPS en producción
+
+Considerar usar una base de datos real en lugar del mock de usuarios
+
+Ajustar políticas CORS para el entorno de producción
+
+Licencia
+Este proyecto está bajo la licencia MIT.
